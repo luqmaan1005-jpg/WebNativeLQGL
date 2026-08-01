@@ -1,11 +1,19 @@
 package com.webnativelqgl
 
+import android.app.Activity
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 
 class GoogleSignInBridge(
+    private val activity: Activity,
     private val webView: WebView
 ) {
 
@@ -14,49 +22,124 @@ class GoogleSignInBridge(
     fun signIn(callback:String) {
 
 
-        // Opens native Google sign in
-        // Real Google Credential Manager code connects here
-
-        val fakeUser = JSONObject()
-
-        fakeUser.put(
-            "id",
-            "google-user-id"
-        )
-
-        fakeUser.put(
-            "name",
-            "Google User"
-        )
-
-        fakeUser.put(
-            "email",
-            "user@gmail.com"
-        )
-
-        fakeUser.put(
-            "photo",
-            ""
-        )
-
-        fakeUser.put(
-            "idToken",
-            "GOOGLE_ID_TOKEN"
-        )
+        CoroutineScope(
+            Dispatchers.Main
+        ).launch {
 
 
-        sendCallback(
-            callback,
-            fakeUser.toString()
-        )
-    }
+            try {
+
+
+                val googleOption =
+                    GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(
+                            "YOUR_WEB_CLIENT_ID"
+                        )
+                        .build()
 
 
 
-    @JavascriptInterface
-    fun signOut(){
+                val request =
+                    GetCredentialRequest.Builder()
+                        .addCredentialOption(
+                            googleOption
+                        )
+                        .build()
 
-        // Clear Google session here
+
+
+                val credentialManager =
+                    CredentialManager.create(
+                        activity
+                    )
+
+
+
+                val result =
+                    credentialManager.getCredential(
+                        activity,
+                        request
+                    )
+
+
+
+                val credential =
+                    result.credential
+
+
+
+                val googleCredential =
+                    credential
+                        as com.google.android.libraries.identity.googleid
+                        .GoogleIdTokenCredential
+
+
+
+                val json =
+                    JSONObject()
+
+
+
+                json.put(
+                    "id",
+                    googleCredential.id
+                )
+
+
+                json.put(
+                    "name",
+                    googleCredential.displayName
+                )
+
+
+                json.put(
+                    "email",
+                    googleCredential.id
+                )
+
+
+                json.put(
+                    "photo",
+                    googleCredential.profilePictureUri
+                )
+
+
+                json.put(
+                    "idToken",
+                    googleCredential.idToken
+                )
+
+
+
+                sendCallback(
+                    callback,
+                    json.toString()
+                )
+
+
+            }
+            catch(e:Exception){
+
+
+                val error =
+                    JSONObject()
+
+
+                error.put(
+                    "error",
+                    e.message
+                )
+
+
+                sendCallback(
+                    callback,
+                    error.toString()
+                )
+
+            }
+
+        }
 
     }
 
@@ -70,14 +153,13 @@ class GoogleSignInBridge(
         webView.post {
 
             webView.evaluateJavascript(
-                """
-                window['$callback']($data)
-                """.trimIndent(),
+                "window['$callback']($data)",
                 null
             )
 
         }
 
     }
+
 
 }
