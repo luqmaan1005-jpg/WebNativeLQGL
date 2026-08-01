@@ -34,7 +34,7 @@ class GoogleSignInBridge(
                     GetGoogleIdOption.Builder()
                         .setFilterByAuthorizedAccounts(false)
                         .setServerClientId(
-                            "YOUR_WEB_CLIENT_ID"
+                            "662633670578-8t6mido2ddipl9oo7ts7of14lo9mvvas.apps.googleusercontent.com"
                         )
                         .build()
 
