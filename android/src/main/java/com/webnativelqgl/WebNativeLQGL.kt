@@ -5,7 +5,8 @@ import android.webkit.WebView
 
 class WebNativeLQGL(
     private val activity: Activity,
-    private val webView: WebView
+    private val webView: WebView,
+    private val clientId: String
 ) {
 
     fun install() {
@@ -15,7 +16,8 @@ class WebNativeLQGL(
         webView.addJavascriptInterface(
             GoogleSignInBridge(
                 activity,
-                webView
+                webView,
+                clientId
             ),
             "AndroidGoogle"
         )
