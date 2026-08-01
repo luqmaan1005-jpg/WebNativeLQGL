@@ -6,6 +6,7 @@ import android.webkit.WebView
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,30 +15,25 @@ import org.json.JSONObject
 
 class GoogleSignInBridge(
     private val activity: Activity,
-    private val webView: WebView
+    private val webView: WebView,
+    private val serverClientId: String
 ) {
 
 
     @JavascriptInterface
-    fun signIn(callback:String) {
-
+    fun signIn(callback: String) {
 
         CoroutineScope(
             Dispatchers.Main
         ).launch {
 
-
             try {
-
 
                 val googleOption =
                     GetGoogleIdOption.Builder()
                         .setFilterByAuthorizedAccounts(false)
-                        .setServerClientId(
-                            "662633670578-8t6mido2ddipl9oo7ts7of14lo9mvvas.apps.googleusercontent.com"
-                        )
+                        .setServerClientId(serverClientId)
                         .build()
-
 
 
                 val request =
@@ -48,12 +44,10 @@ class GoogleSignInBridge(
                         .build()
 
 
-
                 val credentialManager =
                     CredentialManager.create(
                         activity
                     )
-
 
 
                 val result =
@@ -63,22 +57,15 @@ class GoogleSignInBridge(
                     )
 
 
-
-                val credential =
-                    result.credential
-
-
-
                 val googleCredential =
-                    credential
-                        as com.google.android.libraries.identity.googleid
-                        .GoogleIdTokenCredential
-
+                    GoogleIdTokenCredential
+                        .createFrom(
+                            result.credential.data
+                        )
 
 
                 val json =
                     JSONObject()
-
 
 
                 json.put(
@@ -89,7 +76,7 @@ class GoogleSignInBridge(
 
                 json.put(
                     "name",
-                    googleCredential.displayName
+                    googleCredential.displayName ?: ""
                 )
 
 
@@ -101,7 +88,7 @@ class GoogleSignInBridge(
 
                 json.put(
                     "photo",
-                    googleCredential.profilePictureUri
+                    googleCredential.profilePictureUri?.toString() ?: ""
                 )
 
 
@@ -111,15 +98,13 @@ class GoogleSignInBridge(
                 )
 
 
-
                 sendCallback(
                     callback,
                     json.toString()
                 )
 
 
-            }
-            catch(e:Exception){
+            } catch (e: Exception) {
 
 
                 val error =
@@ -128,7 +113,7 @@ class GoogleSignInBridge(
 
                 error.put(
                     "error",
-                    e.message
+                    e.message ?: "Unknown error"
                 )
 
 
@@ -136,19 +121,23 @@ class GoogleSignInBridge(
                     callback,
                     error.toString()
                 )
-
             }
-
         }
+    }
+
+
+    @JavascriptInterface
+    fun signOut() {
+
+        // Add sign-out logic later
 
     }
 
 
-
     private fun sendCallback(
-        callback:String,
-        data:String
-    ){
+        callback: String,
+        data: String
+    ) {
 
         webView.post {
 
@@ -158,8 +147,5 @@ class GoogleSignInBridge(
             )
 
         }
-
     }
-
-
 }
