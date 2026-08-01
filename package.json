@@ -2,11 +2,6 @@
   "name": "webnativelqgl",
   "version": "1.0.0",
   "description": "Google Sign-In bridge for Android WebView apps",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
   "keywords": [
     "android",
     "webview",
@@ -14,8 +9,26 @@
     "signin",
     "oauth"
   ],
+  "homepage": "https://github.com/luqmaan1005-jpg/WebNativeLQGL#readme",
+  "bugs": {
+    "url": "https://github.com/luqmaan1005-jpg/WebNativeLQGL/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luqmaan1005-jpg/WebNativeLQGL.git"
+  },
   "license": "MIT",
+  "author": "luqmaan",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "webnativelqgl": "^1.0.0"
   }
 }
